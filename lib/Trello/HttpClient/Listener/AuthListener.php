@@ -2,7 +2,8 @@
 
 namespace Trello\HttpClient\Listener;
 
-use GuzzleHttp\Event\AbstractRequestEvent as Event;
+use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\RequestInterface;
 use Trello\Client;
 use Trello\Exception\RuntimeException;
 
@@ -24,7 +25,7 @@ class AuthListener
         $this->method = $method;
     }
 
-    public function onRequestBeforeSend(Event $event)
+    public function onRequestBeforeSend(RequestInterface $request)
     {
         // Skip by default
         if (null === $this->method) {
@@ -33,21 +34,21 @@ class AuthListener
 
         switch ($this->method) {
             case Client::AUTH_HTTP_PASSWORD:
-                $event['request']->setHeader(
+                $request->withHeader(
                     'Authorization',
                     sprintf('Basic %s', base64_encode($this->tokenOrLogin . ':' . $this->password))
                 );
                 break;
 
             case Client::AUTH_HTTP_TOKEN:
-                $event['request']->setHeader(
+                $request->withHeader(
                     'Authorization',
                     sprintf('token %s', $this->tokenOrLogin)
                 );
                 break;
 
             case Client::AUTH_URL_CLIENT_ID:
-                $url = $event['request']->getUrl();
+                $url = (string) $request->getUri();
 
                 $parameters = [
                     'key' => $this->tokenOrLogin,
@@ -57,11 +58,11 @@ class AuthListener
                 $url .= (false === strpos($url, '?') ? '?' : '&');
                 $url .= utf8_encode(http_build_query($parameters, '', '&'));
 
-                $event['request']->setUrl($url);
+                $request->withUri(new Uri($url));
                 break;
 
             case Client::AUTH_URL_TOKEN:
-                $url = $event['request']->getUrl();
+                $url = (string) $request->getUri();
                 $url .= (false === strpos($url, '?') ? '?' : '&');
                 $url .= utf8_encode(http_build_query(
                     ['token' => $this->tokenOrLogin, 'key' => $this->password],
@@ -69,7 +70,7 @@ class AuthListener
                     '&'
                 ));
 
-                $event['request']->setUrl($url);
+                $request->withUri(new Uri($url));
                 break;
 
             default:

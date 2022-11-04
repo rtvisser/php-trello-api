@@ -783,7 +783,10 @@ class Card extends AbstractObject implements CardInterface
      */
     public function getActions($params = [])
     {
-        return $this->api->actions()->all($this->id, $params);
+        /** @var \Trello\Api\Card $api */
+        $api = $this->api;
+
+        return $api->actions()->all($this->id, $params);
     }
 
     /**
@@ -822,13 +825,16 @@ class Card extends AbstractObject implements CardInterface
      */
     protected function postSave()
     {
+        /** @var \Trello\Api\Card $api */
+        $api = $this->api;
+
         foreach ($this->newComments as $key => $text) {
-            $this->api->actions()->addComment($this->id, $text);
+            $api->actions()->addComment($this->id, $text);
             unset($this->newComments[$key]);
         }
 
         foreach ($this->commentsToBeRemoved as $key => $commentId) {
-            $this->api->actions()->removeComment($this->id, $commentId);
+            $api->actions()->removeComment($this->id, $commentId);
             unset($this->commentsToBeRemoved[$key]);
         }
     }

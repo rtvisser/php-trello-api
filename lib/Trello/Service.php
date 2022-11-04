@@ -2,8 +2,8 @@
 
 namespace Trello;
 
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Trello\Exception\InvalidArgumentException;
@@ -238,6 +238,6 @@ class Service extends Manager
 
         $event->setRequestData($data);
 
-        $this->dispatcher->dispatch($eventName, $event);
+        $this->dispatcher->dispatch($event, $eventName);
     }
 }

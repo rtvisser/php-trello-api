@@ -4,13 +4,13 @@ namespace Trello\HttpClient;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\ResponseInterface;
 use Trello\Exception\ErrorException;
 use Trello\Exception\RuntimeException;
 use Trello\HttpClient\Listener\AuthListener;
 use Trello\HttpClient\Listener\ErrorListener;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class HttpClient implements HttpClientInterface
 {
@@ -28,20 +28,21 @@ class HttpClient implements HttpClientInterface
 
     protected $headers = [];
 
-    private $lastResponse;
-    private $lastRequest;
+    private ?ResponseInterface $lastResponse = null;
 
-    /**
-     * @param array $options
-     * @param ClientInterface $client
-     */
+    private HandlerStack $handlerStack;
+
     public function __construct(array $options = [], ClientInterface $client = null)
     {
+        $this->handlerStack = HandlerStack::create();
+
         $this->options = array_merge($this->options, $options);
+        $this->options['handler'] = $this->handlerStack;
         $client = $client ?: new GuzzleClient($this->options);
         $this->client = $client;
 
-        $this->addListener('request.error', [new ErrorListener(), 'onRequestError']);
+        $errorListener = new ErrorListener();
+        $this->addMiddleware($errorListener->getErrorsHandler());
         $this->clearHeaders();
     }
 
@@ -73,17 +74,14 @@ class HttpClient implements HttpClientInterface
     }
 
     /**
-     * @param string $eventName
-     * @param callable $listener
+     * example $handler->push(Middleware::mapRequest(function (RequestInterface $request) {
+     *      // Notice that we have to return a request object
+     *      return $request->withHeader('X-Foo', 'Bar');
+     * }));
      */
-    public function addListener($eventName, $listener)
+    public function addMiddleware(callable $middleware)
     {
-        $this->client->getEmitter()->on($eventName, $listener);
-    }
-
-    public function addSubscriber(EventSubscriberInterface $subscriber)
-    {
-        $this->client->getEmitter()->attach($subscriber);
+        $this->handlerStack->push($middleware);
     }
 
     /**
@@ -143,17 +141,14 @@ class HttpClient implements HttpClientInterface
      */
     public function request($path, $body = null, $httpMethod = 'GET', array $headers = [], array $options = [])
     {
-        $request = $this->createRequest($httpMethod, $path, $body, $headers, $options);
-
         try {
-            $response = $this->client->send($request);
+            $response = $this->sendRequest($httpMethod, $path, $body, $headers, $options);
         } catch (\LogicException $e) {
             throw new ErrorException($e->getMessage(), $e->getCode(), $e);
         } catch (\RuntimeException $e) {
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $this->lastRequest = $request;
         $this->lastResponse = $response;
 
         return $response;
@@ -164,24 +159,13 @@ class HttpClient implements HttpClientInterface
      */
     public function authenticate($tokenOrLogin, $password, $method)
     {
-        $this->addListener('request.before_send', [
+        $this->addMiddleware(Middleware::mapRequest([
             new AuthListener($tokenOrLogin, $password, $method),
             'onRequestBeforeSend',
-        ]);
+        ]));
     }
 
-    /**
-     * @return Request
-     */
-    public function getLastRequest()
-    {
-        return $this->lastRequest;
-    }
-
-    /**
-     * @return Response
-     */
-    public function getLastResponse()
+    public function getLastResponse(): ResponseInterface
     {
         return $this->lastResponse;
     }
@@ -189,10 +173,8 @@ class HttpClient implements HttpClientInterface
     /**
      * @param string $httpMethod
      * @param string $path
-     *
-     * @return Request|\GuzzleHttp\Message\RequestInterface
      */
-    protected function createRequest($httpMethod, $path, $body = null, array $headers = [], array $options = [])
+    protected function sendRequest($httpMethod, $path, $body = null, array $headers = [], array $options = []): ResponseInterface
     {
         $path = $this->options['api_version'] . '/' . $path;
 
@@ -204,6 +186,6 @@ class HttpClient implements HttpClientInterface
         $options['body'] = $body;
         $options['headers'] = array_merge($this->headers, $headers);
 
-        return $this->client->createRequest($httpMethod, $path, $options);
+        return $this->client->request($httpMethod, $path, $options);
     }
 }

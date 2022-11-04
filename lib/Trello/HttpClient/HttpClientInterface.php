@@ -2,8 +2,8 @@
 
 namespace Trello\HttpClient;
 
+use Psr\Http\Message\ResponseInterface;
 use Trello\Exception\InvalidArgumentException;
-use GuzzleHttp\Message\Response;
 
 interface HttpClientInterface
 {
@@ -14,7 +14,7 @@ interface HttpClientInterface
      * @param array $parameters GET Parameters
      * @param array $headers Reconfigure the request headers for this call only
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function get($path, array $parameters = [], array $headers = []);
 
@@ -25,7 +25,7 @@ interface HttpClientInterface
      * @param mixed $body Request body
      * @param array $headers Reconfigure the request headers for this call only
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function post($path, $body = null, array $headers = []);
 
@@ -36,7 +36,7 @@ interface HttpClientInterface
      * @param mixed $body Request body
      * @param array $headers Reconfigure the request headers for this call only
      *
-     * @return Response
+     * @return ResponseInterface
      * @internal param array $parameters Request body
      */
     public function patch($path, $body = null, array $headers = []);
@@ -48,7 +48,7 @@ interface HttpClientInterface
      * @param mixed $body Request body
      * @param array $headers Reconfigure the request headers for this call only
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function put($path, $body, array $headers = []);
 
@@ -59,7 +59,7 @@ interface HttpClientInterface
      * @param mixed $body Request body
      * @param array $headers Reconfigure the request headers for this call only
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function delete($path, $body = null, array $headers = []);
 
@@ -72,7 +72,7 @@ interface HttpClientInterface
      * @param string $httpMethod HTTP method to use
      * @param array $headers Request headers
      *
-     * @return Response
+     * @return ResponseInterface
      */
     public function request($path, $body, $httpMethod = 'GET', array $headers = []);
 

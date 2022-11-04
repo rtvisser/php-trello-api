@@ -52,7 +52,7 @@ class Notification extends AbstractApi
      * @param string $id the notification's id
      * @param array $data attributes to update
      *
-     * @return arrays
+     * @return array
      */
     public function update($id, array $data)
     {
@@ -66,7 +66,7 @@ class Notification extends AbstractApi
      * @param string $id the notification's id
      * @param bool $status true for unread, false for read
      *
-     * @return arrays
+     * @return array
      */
     public function setUnread($id, $status)
     {

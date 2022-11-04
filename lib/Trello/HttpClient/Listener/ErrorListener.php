@@ -2,31 +2,50 @@
 
 namespace Trello\HttpClient\Listener;
 
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Trello\HttpClient\Message\ResponseMediator;
-use GuzzleHttp\Event\AbstractRequestEvent as Event;
 use Trello\Exception\ErrorException;
 use Trello\Exception\RuntimeException;
 use Trello\Exception\PermissionDeniedException;
 use Trello\Exception\ValidationFailedException;
 use Trello\Exception\ApiLimitExceedException;
 
-/**
- * @TODO Map real errors from Trello API
- */
 class ErrorListener
 {
+    public function getErrorsHandler()
+    {
+        return function (callable $handler) {
+            return function ($request, array $options) use ($handler) {
+                return $handler($request, $options)->then(
+                    function (ResponseInterface $response) use ($request) {
+                        if (!$this->isClientError($response) && !$this->isServerError($response)) {
+                            return;
+                        }
+
+
+                        $this->throwException($request, $response);
+                    }
+                );
+            };
+        };
+    }
+
+    private function isClientError(ResponseInterface $response)
+    {
+        return $response->getStatusCode() >= 400 && $response->getStatusCode() < 500;
+    }
+
+    private function isServerError(ResponseInterface $response)
+    {
+        return $response->getStatusCode() >= 500 && $response->getStatusCode() < 600;
+    }
+
     /**
      * {@inheritDoc}
      */
-    public function onRequestError(Event $event)
+    private function throwException(RequestInterface $request, ResponseInterface $response)
     {
-        $request = $event['request'];
-        $response = $request->getResponse();
-
-        if (!$response->isClientError() && !$response->isServerError()) {
-            return;
-        }
-
         switch ($response->getStatusCode()) {
             case 429:
                 throw new ApiLimitExceedException('Wait a second.', 429);

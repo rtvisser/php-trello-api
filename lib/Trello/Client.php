@@ -253,7 +253,7 @@ class Client implements ClientInterface
         }
 
         if ('api_version' == $name && !in_array($value, $this->getSupportedApiVersions())) {
-            throw new InvalidArgumentException(sprintf('Invalid API version ("%s"), valid are: %s', $name, implode(', ', $supportedApiVersions)));
+            throw new InvalidArgumentException(sprintf('Invalid API version ("%s"), valid are: %s', $name, implode(', ', $this->getSupportedApiVersions())));
         }
 
         $this->options[$name] = $value;

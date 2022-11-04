@@ -106,7 +106,6 @@ class Checklist extends AbstractApi
      * @link https://trello.readme.io/v1.0/reference#checklistsidcardscheckitems
      *
      * @param string $checkListId the checklist's id
-     * @param string $listItemId (optional) the listItem id
      * @param array $fields (options) the fields to retrieve
      *
      * @return array

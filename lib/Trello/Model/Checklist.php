@@ -257,14 +257,17 @@ class Checklist extends AbstractObject implements ChecklistInterface
             $this->create();
         }
 
+        /** @var \Trello\Api\Checklist $api */
+        $api = $this->api;
+
         foreach ($this->itemsToBeRemoved as $itemId) {
-            $this->api->items()->remove($this->id, $itemId);
+            $api->items()->remove($this->id, $itemId);
         }
         foreach ($items as $item) {
             if (isset($item['id'])) {
-                $this->api->items()->update($this->id, $item['id'], $item);
+                $api->items()->update($this->id, $item['id'], $item);
             } else {
-                $this->api->items()->create($this->id, $item['name'], $item['state'], $item);
+                $api->items()->create($this->id, $item['name'], $item['state'], $item);
             }
         }
     }

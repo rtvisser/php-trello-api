@@ -33,7 +33,7 @@ class Cards extends AbstractApi
      * @link https://trello.com/docs/api/checklist/#get-1-checklists-idchecklist-cards-filter
      *
      * @param string $id the checklist's id
-     * @param array $filter one of 'none', 'open', 'closed', 'all'
+     * @param string $filter one of 'none', 'open', 'closed', 'all'
      *
      * @return array
      */

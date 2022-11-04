@@ -2,6 +2,7 @@
 
 namespace Trello\Api;
 
+use Psr\Http\Message\ResponseInterface;
 use Trello\Client;
 use Trello\HttpClient\Message\ResponseMediator;
 use Trello\Exception\InvalidArgumentException;
@@ -119,34 +120,14 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a HEAD request with query parameters
-     *
-     * @param string $path Request path.
-     * @param array $parameters HEAD parameters.
-     * @param array $requestHeaders Request headers.
-     *
-     * @return \GuzzleHttp\Message\Response
-     */
-    protected function head($path, array $parameters = [], $requestHeaders = [])
+    protected function head(string $path, array $parameters = [], array $requestHeaders = []): ResponseInterface
     {
-        $response = $this->client->getHttpClient()->request($path, null, 'HEAD', $requestHeaders, [
+        return $this->client->getHttpClient()->request($path, null, 'HEAD', $requestHeaders, [
             'query' => $parameters,
         ]);
-
-        return $response;
     }
 
-    /**
-     * Send a POST request with JSON-encoded parameters.
-     *
-     * @param string $path Request path.
-     * @param array $parameters POST parameters to be JSON encoded.
-     * @param array $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function post($path, array $parameters = [], $requestHeaders = [])
+    protected function post(string $path, array $parameters = [], array $requestHeaders = []): ResponseInterface
     {
         return $this->postRaw(
             $path,
@@ -155,36 +136,16 @@ abstract class AbstractApi implements ApiInterface
         );
     }
 
-    /**
-     * Send a POST request with raw data.
-     *
-     * @param string $path Request path.
-     * @param mixed $body Request body.
-     * @param array $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function postRaw($path, $body, $requestHeaders = [])
+    protected function postRaw(string $path, $body, array $requestHeaders = []): ResponseInterface
     {
-        $response = $this->client->getHttpClient()->post(
+        return $this->client->getHttpClient()->post(
             $path,
             $body,
             $requestHeaders
         );
-
-        return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a PATCH request with JSON-encoded parameters.
-     *
-     * @param string $path Request path.
-     * @param array $parameters POST parameters to be JSON encoded.
-     * @param array $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function patch($path, array $parameters = [], $requestHeaders = [])
+    protected function patch(string $path, array $parameters = [], array $requestHeaders = [])
     {
         $response = $this->client->getHttpClient()->patch(
             $path,
@@ -195,16 +156,7 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a PUT request with JSON-encoded parameters.
-     *
-     * @param string $path Request path.
-     * @param array $parameters POST parameters to be JSON encoded.
-     * @param array $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function put($path, array $parameters = [], $requestHeaders = [])
+    protected function put(string $path, array $parameters = [], array $requestHeaders = [])
     {
         foreach ($parameters as $name => $parameter) {
             if (is_bool($parameter)) {
@@ -221,16 +173,7 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a DELETE request with JSON-encoded parameters.
-     *
-     * @param string $path Request path.
-     * @param array $parameters POST parameters to be JSON encoded.
-     * @param array $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function delete($path, array $parameters = [], $requestHeaders = [])
+    protected function delete(string $path, array $parameters = [], array $requestHeaders = [])
     {
         $response = $this->client->getHttpClient()->delete(
             $path,
@@ -241,13 +184,6 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Prepare request parameters.
-     *
-     * @param array $parameters Request parameters
-     *
-     * @return null|string
-     */
     protected function createParametersBody(array $parameters)
     {
         foreach ($parameters as $name => $parameter) {
