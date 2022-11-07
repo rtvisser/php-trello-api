@@ -20,9 +20,8 @@ class ErrorListener
                 return $handler($request, $options)->then(
                     function (ResponseInterface $response) use ($request) {
                         if (!$this->isClientError($response) && !$this->isServerError($response)) {
-                            return;
+                            return $response;
                         }
-
 
                         $this->throwException($request, $response);
                     }

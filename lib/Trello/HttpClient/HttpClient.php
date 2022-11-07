@@ -15,7 +15,7 @@ use Trello\HttpClient\Listener\ErrorListener;
 class HttpClient implements HttpClientInterface
 {
     protected $options = [
-        'base_url' => 'https://api.trello.com/',
+        'base_uri' => 'https://api.trello.com/',
         'user_agent' => 'php-trello-api (http://github.com/cdaguerre/php-trello-api)',
         'timeout' => 50,
         'api_version' => 1,
@@ -144,7 +144,7 @@ class HttpClient implements HttpClientInterface
         try {
             $response = $this->sendRequest($httpMethod, $path, $body, $headers, $options);
         } catch (\LogicException $e) {
-            throw new ErrorException($e->getMessage(), $e->getCode(), $e);
+            throw new ErrorException($e->getMessage(), $e->getCode(), 1, __FILE__, __LINE__, $e);
         } catch (\RuntimeException $e) {
             throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
@@ -183,7 +183,10 @@ class HttpClient implements HttpClientInterface
             $path .= utf8_encode(http_build_query($body, '', '&'));
         }
 
-        $options['body'] = $body;
+        if (($httpMethod === 'POST' || $httpMethod === 'PUT') && $body) {
+            $options['form_params'] = $body;
+        }
+
         $options['headers'] = array_merge($this->headers, $headers);
 
         return $this->client->request($httpMethod, $path, $options);

@@ -29,19 +29,19 @@ class AuthListener
     {
         // Skip by default
         if (null === $this->method) {
-            return;
+            return $request;
         }
 
         switch ($this->method) {
             case Client::AUTH_HTTP_PASSWORD:
-                $request->withHeader(
+                $request = $request->withHeader(
                     'Authorization',
                     sprintf('Basic %s', base64_encode($this->tokenOrLogin . ':' . $this->password))
                 );
                 break;
 
             case Client::AUTH_HTTP_TOKEN:
-                $request->withHeader(
+                $request = $request->withHeader(
                     'Authorization',
                     sprintf('token %s', $this->tokenOrLogin)
                 );
@@ -58,7 +58,7 @@ class AuthListener
                 $url .= (false === strpos($url, '?') ? '?' : '&');
                 $url .= utf8_encode(http_build_query($parameters, '', '&'));
 
-                $request->withUri(new Uri($url));
+                $request = $request->withUri(new Uri($url));
                 break;
 
             case Client::AUTH_URL_TOKEN:
@@ -70,11 +70,13 @@ class AuthListener
                     '&'
                 ));
 
-                $request->withUri(new Uri($url));
+                $request = $request->withUri(new Uri($url));
                 break;
 
             default:
                 throw new RuntimeException(sprintf('%s not yet implemented', $this->method));
         }
+
+        return $request;
     }
 }

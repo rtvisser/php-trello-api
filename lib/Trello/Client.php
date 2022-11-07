@@ -60,7 +60,7 @@ class Client implements ClientInterface
      * @var array
      */
     private $options = [
-        'base_url' => 'https://api.trello.com/',
+        'base_uri' => 'https://api.trello.com/',
         'user_agent' => 'php-trello-api (http://github.com/cdaguerre/php-trello-api)',
         'timeout' => 50,
         'api_limit' => 5000,
