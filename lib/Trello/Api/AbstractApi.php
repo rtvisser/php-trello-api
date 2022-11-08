@@ -127,7 +127,7 @@ abstract class AbstractApi implements ApiInterface
         ]);
     }
 
-    protected function post(string $path, array $parameters = [], array $requestHeaders = []): ResponseInterface
+    protected function post(string $path, array $parameters = [], array $requestHeaders = [])
     {
         return $this->postRaw(
             $path,
@@ -136,13 +136,15 @@ abstract class AbstractApi implements ApiInterface
         );
     }
 
-    protected function postRaw(string $path, $body, array $requestHeaders = []): ResponseInterface
+    protected function postRaw(string $path, $body, array $requestHeaders = [])
     {
-        return $this->client->getHttpClient()->post(
+        $response = $this->client->getHttpClient()->post(
             $path,
             $body,
             $requestHeaders
         );
+
+        return ResponseMediator::getContent($response);
     }
 
     protected function patch(string $path, array $parameters = [], array $requestHeaders = [])
