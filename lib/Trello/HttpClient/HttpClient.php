@@ -84,6 +84,11 @@ class HttpClient implements HttpClientInterface
         $this->handlerStack->push($middleware);
     }
 
+    public function addMiddlewareAtTheBeginning(callable $middleware)
+    {
+        $this->handlerStack->unshift($middleware);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -159,7 +164,7 @@ class HttpClient implements HttpClientInterface
      */
     public function authenticate($tokenOrLogin, $password, $method)
     {
-        $this->addMiddleware(Middleware::mapRequest([
+        $this->addMiddlewareAtTheBeginning(Middleware::mapRequest([
             new AuthListener($tokenOrLogin, $password, $method),
             'onRequestBeforeSend',
         ]));
