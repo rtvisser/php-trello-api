@@ -164,4 +164,9 @@ class Labels extends AbstractApi
 
         return $this->put('labels/' . rawurlencode($id), ['color' => $color]);
     }
+
+    public function remove($id)
+    {
+        return $this->delete('labels/' . rawurlencode($id));
+    }
 }
