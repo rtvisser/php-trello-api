@@ -13,6 +13,40 @@ use Trello\Exception\InvalidArgumentException;
  */
 class Labels extends AbstractApi
 {
+    private const SUPPORTED_COLORS = [
+        "green_light",
+        "green_dark",
+        "green",
+        "yellow_light",
+        "yellow_dark",
+        "yellow",
+        "orange_light",
+        "orange_dark",
+        "orange",
+        "red_light",
+        "red_dark",
+        "red",
+        "purple_light",
+        "purple_dark",
+        "purple",
+        "blue_light",
+        "blue_dark",
+        "blue",
+        "sky_light",
+        "sky_dark",
+        "sky",
+        "lime_light",
+        "lime_dark",
+        "lime",
+        "pink_light",
+        "pink_dark",
+        "pink",
+        "black_light",
+        "black_dark",
+        "black",
+        "notset",
+    ];
+
     /**
      * Base path of board labels api
      * @var string
@@ -44,12 +78,10 @@ class Labels extends AbstractApi
      */
     public function show($id, $color)
     {
-        $colors = ['blue', 'green', 'orange', 'purple', 'red', 'yellow'];
-
-        if (!in_array($color, $colors)) {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
             throw new InvalidArgumentException(sprintf(
                 'The "color" parameter must be one of "%s".',
-                implode(", ", $colors)
+                implode(", ", self::SUPPORTED_COLORS)
             ));
         }
 
@@ -94,12 +126,10 @@ class Labels extends AbstractApi
      */
     public function setName($id, $color, $name)
     {
-        $colors = ['blue', 'green', 'orange', 'purple', 'red', 'yellow'];
-
-        if (!in_array($color, $colors)) {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
             throw new InvalidArgumentException(sprintf(
                 'The "color" parameter must be one of "%s".',
-                implode(", ", $colors)
+                implode(", ", self::SUPPORTED_COLORS)
             ));
         }
 
