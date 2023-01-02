@@ -147,4 +147,21 @@ class Labels extends AbstractApi
 
         return $this->put('labels/' . rawurlencode($id), ['name' => $name, 'color' => $color]);
     }
+
+    public function updateName($id, $name)
+    {
+        return $this->put('labels/' . rawurlencode($id), ['name' => $name]);
+    }
+
+    public function updateColor($id, $color)
+    {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
+            throw new InvalidArgumentException(sprintf(
+                'The "color" parameter must be one of "%s".',
+                implode(", ", self::SUPPORTED_COLORS)
+            ));
+        }
+
+        return $this->put('labels/' . rawurlencode($id), ['color' => $color]);
+    }
 }
