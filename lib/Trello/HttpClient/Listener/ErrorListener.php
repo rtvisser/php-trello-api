@@ -47,8 +47,16 @@ class ErrorListener
     {
         switch ($response->getStatusCode()) {
             case 429:
-                throw new ApiLimitExceedException('Wait a second.', 429);
-                break;
+                $message = 'Wait a second.';
+
+                switch ($responseBody['error'] ?? null) {
+                    case ApiLimitExceedException::API_KEY_LIMIT_EXCEEDED:
+                        throw ApiLimitExceedException::createForApiKeyLimit($message, 429);
+                    case ApiLimitExceedException::API_TOKEN_LIMIT_EXCEEDED:
+                        throw ApiLimitExceedException::createForApiTokenLimit($message, 429);
+                    default:
+                        throw new ApiLimitExceedException($message, 429);
+                }
         }
 
         $content = ResponseMediator::getContent($response);
