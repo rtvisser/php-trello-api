@@ -45,11 +45,13 @@ class ErrorListener
      */
     private function throwException(RequestInterface $request, ResponseInterface $response)
     {
+        $content = ResponseMediator::getContent($response);
+
         switch ($response->getStatusCode()) {
             case 429:
                 $message = 'Wait a second.';
 
-                switch ($responseBody['error'] ?? null) {
+                switch ($content['error'] ?? null) {
                     case ApiLimitExceedException::API_KEY_LIMIT_EXCEEDED:
                         throw ApiLimitExceedException::createForApiKeyLimit($message, 429);
                     case ApiLimitExceedException::API_TOKEN_LIMIT_EXCEEDED:
@@ -59,7 +61,6 @@ class ErrorListener
                 }
         }
 
-        $content = ResponseMediator::getContent($response);
         if (is_array($content) && isset($content['message'])) {
             if (400 == $response->getStatusCode()) {
                 throw new ErrorException($content['message'], 400);
