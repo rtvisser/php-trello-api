@@ -101,6 +101,12 @@ class ErrorListener
             }
         }
 
-        throw new RuntimeException(isset($content['message']) ? $content['message'] : $content, $response->getStatusCode());
+        $message = $content['message'] ?? $content;
+
+        if (!$message) {
+            $message = (string) $response->getBody();
+        }
+
+        throw new RuntimeException($message, $response->getStatusCode());
     }
 }
