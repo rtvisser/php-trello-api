@@ -12,20 +12,20 @@ class Checklist extends AbstractObject implements ChecklistInterface
 {
     protected $apiName = 'checklist';
 
-    protected $loadParams = array(
+    protected $loadParams = [
         'fields' => 'all',
         'checkItems' => 'all',
         'checkItem_fields' => 'all',
-    );
+    ];
 
-    protected $itemsToBeRemoved = array();
+    protected $itemsToBeRemoved = [];
 
     public function __construct(ClientInterface $client, $id = null)
     {
-        $this->data = array(
+        $this->data = [
             'name' => null,
-            'checkItems' => array(),
-        );
+            'checkItems' => [],
+        ];
 
         parent::__construct($client, $id);
     }
@@ -205,11 +205,11 @@ class Checklist extends AbstractObject implements ChecklistInterface
                 $this->data['checkItems'][$key]['position'] = $position;
             }
         } else {
-            $this->data['checkItems'][] = array(
-                'name'     => $nameOrId,
-                'state'    => $checked,
+            $this->data['checkItems'][] = [
+                'name' => $nameOrId,
+                'state' => $checked,
                 'position' => $position,
-            );
+            ];
         }
 
         return $this;
@@ -242,7 +242,7 @@ class Checklist extends AbstractObject implements ChecklistInterface
     protected function postRefresh()
     {
         foreach ($this->data['checkItems'] as $key => $item) {
-            $this->data['checkItems'][$key]['state'] = in_array($item['state'], array(true, 'complete', 'true'));
+            $this->data['checkItems'][$key]['state'] = in_array($item['state'], [true, 'complete', 'true']);
         }
     }
 
@@ -257,14 +257,17 @@ class Checklist extends AbstractObject implements ChecklistInterface
             $this->create();
         }
 
+        /** @var \Trello\Api\Checklist $api */
+        $api = $this->api;
+
         foreach ($this->itemsToBeRemoved as $itemId) {
-            $this->api->items()->remove($this->id, $itemId);
+            $api->items()->remove($this->id, $itemId);
         }
         foreach ($items as $item) {
             if (isset($item['id'])) {
-                $this->api->items()->update($this->id, $item['id'], $item);
+                $api->items()->update($this->id, $item['id'], $item);
             } else {
-                $this->api->items()->create($this->id, $item['name'], $item['state'], $item);
+                $api->items()->create($this->id, $item['name'], $item['state'], $item);
             }
         }
     }

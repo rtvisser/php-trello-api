@@ -13,6 +13,40 @@ use Trello\Exception\InvalidArgumentException;
  */
 class Labels extends AbstractApi
 {
+    private const SUPPORTED_COLORS = [
+        "green_light",
+        "green_dark",
+        "green",
+        "yellow_light",
+        "yellow_dark",
+        "yellow",
+        "orange_light",
+        "orange_dark",
+        "orange",
+        "red_light",
+        "red_dark",
+        "red",
+        "purple_light",
+        "purple_dark",
+        "purple",
+        "blue_light",
+        "blue_dark",
+        "blue",
+        "sky_light",
+        "sky_dark",
+        "sky",
+        "lime_light",
+        "lime_dark",
+        "lime",
+        "pink_light",
+        "pink_dark",
+        "pink",
+        "black_light",
+        "black_dark",
+        "black",
+        "notset",
+    ];
+
     /**
      * Base path of board labels api
      * @var string
@@ -23,12 +57,12 @@ class Labels extends AbstractApi
      * Get labels related to a given board
      * @link https://trello.com/docs/api/board/#get-1-boards-board-id-labels
      *
-     * @param string $id     the board's
-     * @param array  $params optional parameters
+     * @param string $id the board's
+     * @param array $params optional parameters
      *
      * @return array
      */
-    public function all($id, array $params = array())
+    public function all($id, array $params = [])
     {
         return $this->get($this->getPath($id), $params);
     }
@@ -37,23 +71,21 @@ class Labels extends AbstractApi
      * Get a label related to a given board
      * @link https://trello.com/docs/api/board/#get-1-boards-board-id-labels-idlabel
      *
-     * @param string $id    the board's id
+     * @param string $id the board's id
      * @param string $color the label's color
      *
      * @return array
      */
     public function show($id, $color)
     {
-        $colors = array('blue', 'green', 'orange', 'purple', 'red', 'yellow');
-
-        if (!in_array($color, $colors)) {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
             throw new InvalidArgumentException(sprintf(
                 'The "color" parameter must be one of "%s".',
-                implode(", ", $colors)
+                implode(", ", self::SUPPORTED_COLORS)
             ));
         }
 
-        return $this->get($this->getPath($id).'/'.rawurlencode($color));
+        return $this->get($this->getPath($id) . '/' . rawurlencode($color));
     }
 
     /**
@@ -86,7 +118,7 @@ class Labels extends AbstractApi
      * @link https://trello.com/docs/api/board/#put-1-boards-board-id-labelnames-red
      * @link https://trello.com/docs/api/board/#put-1-boards-board-id-labelnames-yellow
      *
-     * @param string $id    the board's id
+     * @param string $id the board's id
      * @param string $color the label color to set the name of
      * @param string $name
      *
@@ -94,15 +126,47 @@ class Labels extends AbstractApi
      */
     public function setName($id, $color, $name)
     {
-        $colors = array('blue', 'green', 'orange', 'purple', 'red', 'yellow');
-
-        if (!in_array($color, $colors)) {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
             throw new InvalidArgumentException(sprintf(
                 'The "color" parameter must be one of "%s".',
-                implode(", ", $colors)
+                implode(", ", self::SUPPORTED_COLORS)
             ));
         }
 
-        return $this->put('boards/'.rawurlencode($id).'/labelNames/'.rawurlencode($color), array('value' => $name));
+        return $this->put('boards/' . rawurlencode($id) . '/labelNames/' . rawurlencode($color), ['value' => $name]);
+    }
+
+    public function update($id, $color, $name)
+    {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
+            throw new InvalidArgumentException(sprintf(
+                'The "color" parameter must be one of "%s".',
+                implode(", ", self::SUPPORTED_COLORS)
+            ));
+        }
+
+        return $this->put('labels/' . rawurlencode($id), ['name' => $name, 'color' => $color]);
+    }
+
+    public function updateName($id, $name)
+    {
+        return $this->put('labels/' . rawurlencode($id), ['name' => $name]);
+    }
+
+    public function updateColor($id, $color)
+    {
+        if (!in_array($color, self::SUPPORTED_COLORS)) {
+            throw new InvalidArgumentException(sprintf(
+                'The "color" parameter must be one of "%s".',
+                implode(", ", self::SUPPORTED_COLORS)
+            ));
+        }
+
+        return $this->put('labels/' . rawurlencode($id), ['color' => $color]);
+    }
+
+    public function remove($id)
+    {
+        return $this->delete('labels/' . rawurlencode($id));
     }
 }

@@ -19,7 +19,6 @@ interface ObjectInterface
      * @return AbstractObject
      *
      * @throws BadMethodCallException    If this method is not allowed by the API on the child object
-     * @throws PermissionDeniedException If the client does not have sufficient privileges
      */
     public function save();
 
@@ -29,7 +28,6 @@ interface ObjectInterface
      * @return AbstractObject
      *
      * @throws BadMethodCallException    If this method is not allowed by the API on the child object
-     * @throws PermissionDeniedException If the client does not have sufficient privileges
      */
     public function remove();
 

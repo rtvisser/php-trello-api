@@ -92,10 +92,6 @@ interface OrganizationInterface extends ObjectInterface
     public function getBoards();
 
     /**
-     * Set invited
-     *
-     * @param string $invited
-     *
      * @return OrganizationInterface
      */
     public function setInvited(array $invited);
@@ -108,10 +104,6 @@ interface OrganizationInterface extends ObjectInterface
     public function getInvited();
 
     /**
-     * Set invitations
-     *
-     * @param string $invitations
-     *
      * @return OrganizationInterface
      */
     public function setInvitations(array $invitations);

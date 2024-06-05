@@ -2,7 +2,8 @@
 
 namespace Trello\HttpClient\Listener;
 
-use Guzzle\Common\Event;
+use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\RequestInterface;
 use Trello\Client;
 use Trello\Exception\RuntimeException;
 
@@ -17,63 +18,65 @@ class AuthListener
      * @param string $password
      * @param null|string $method
      */
-    public function __construct($tokenOrLogin, $password = null, $method)
+    public function __construct($tokenOrLogin, $password, $method)
     {
         $this->tokenOrLogin = $tokenOrLogin;
-        $this->password = $password;
+        $this->password = $password ?: null;
         $this->method = $method;
     }
 
-    public function onRequestBeforeSend(Event $event)
+    public function onRequestBeforeSend(RequestInterface $request)
     {
         // Skip by default
         if (null === $this->method) {
-            return;
+            return $request;
         }
 
         switch ($this->method) {
             case Client::AUTH_HTTP_PASSWORD:
-                $event['request']->setHeader(
+                $request = $request->withHeader(
                     'Authorization',
-                    sprintf('Basic %s', base64_encode($this->tokenOrLogin.':'.$this->password))
+                    sprintf('Basic %s', base64_encode($this->tokenOrLogin . ':' . $this->password))
                 );
                 break;
 
             case Client::AUTH_HTTP_TOKEN:
-                $event['request']->setHeader(
+                $request = $request->withHeader(
                     'Authorization',
                     sprintf('token %s', $this->tokenOrLogin)
                 );
                 break;
 
             case Client::AUTH_URL_CLIENT_ID:
-                $url = $event['request']->getUrl();
+                $url = (string) $request->getUri();
 
-                $parameters = array(
-                    'key'   => $this->tokenOrLogin,
+                $parameters = [
+                    'key' => $this->tokenOrLogin,
                     'token' => $this->password,
-                );
+                ];
 
                 $url .= (false === strpos($url, '?') ? '?' : '&');
                 $url .= utf8_encode(http_build_query($parameters, '', '&'));
 
-                $event['request']->setUrl($url);
+                $request = $request->withUri(new Uri($url));
                 break;
 
             case Client::AUTH_URL_TOKEN:
-                $url = $event['request']->getUrl();
+                $url = (string) $request->getUri();
                 $url .= (false === strpos($url, '?') ? '?' : '&');
                 $url .= utf8_encode(http_build_query(
-                    array('token' => $this->tokenOrLogin, 'key' => $this->password),
+                    ['token' => $this->tokenOrLogin, 'key' => $this->password],
                     '',
                     '&'
                 ));
 
-                $event['request']->setUrl($url);
+                $request = $request->withUri(new Uri($url));
                 break;
 
             default:
                 throw new RuntimeException(sprintf('%s not yet implemented', $this->method));
         }
+
+        return $request;
     }
 }

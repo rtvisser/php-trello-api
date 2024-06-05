@@ -37,7 +37,7 @@ abstract class AbstractObject
      *
      * @var array
      */
-    protected $loadParams = array('fields' => 'all');
+    protected $loadParams = ['fields' => 'all'];
 
     /**
      * @var string
@@ -53,12 +53,12 @@ abstract class AbstractObject
      * Constructor.
      *
      * @param ClientInterface $client the Trello client
-     * @param string          $id     the id of the object
+     * @param string $id the id of the object
      */
     public function __construct(ClientInterface $client, $id = null)
     {
         $this->client = $client;
-        $this->api    = $client->api($this->apiName);
+        $this->api = $client->api($this->apiName);
 
         $this->fields = $this->api->getFields();
 
@@ -82,6 +82,7 @@ abstract class AbstractObject
     public function refresh()
     {
         $this->preRefresh();
+        /** @phpstan-ignore-next-line */
         $this->data = $this->api->show($this->id, $this->loadParams);
         $this->postRefresh();
 
@@ -115,6 +116,7 @@ abstract class AbstractObject
     {
         try {
             $this->preRemove();
+            /** @phpstan-ignore-next-line */
             $this->api->remove($this->id);
             $this->postRemove();
         } catch (BadMethodCallException $e) {
@@ -153,6 +155,7 @@ abstract class AbstractObject
     protected function update()
     {
         $this->preUpdate();
+        /** @phpstan-ignore-next-line */
         $this->data = $this->api->update($this->id, $this->data);
         $this->postUpdate();
 
@@ -167,8 +170,9 @@ abstract class AbstractObject
     protected function create()
     {
         $this->preCreate();
+        /** @phpstan-ignore-next-line */
         $this->data = $this->api->create($this->data);
-        $this->id   = $this->data['id'];
+        $this->id = $this->data['id'];
         $this->postCreate();
 
         return $this;

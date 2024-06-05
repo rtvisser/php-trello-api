@@ -2,6 +2,7 @@
 
 namespace Trello\Api;
 
+use Psr\Http\Message\ResponseInterface;
 use Trello\Client;
 use Trello\HttpClient\Message\ResponseMediator;
 use Trello\Exception\InvalidArgumentException;
@@ -48,8 +49,8 @@ abstract class AbstractApi implements ApiInterface
      * Catches any undefined "get{$field}" calls, and passes them
      * to the getField() if the $field is in the $this->fields property
      *
-     * @param string $method    called method
-     * @param array  $arguments array of arguments passed to called method
+     * @param string $method called method
+     * @param array $arguments array of arguments passed to called method
      *
      * @return array
      *
@@ -85,7 +86,7 @@ abstract class AbstractApi implements ApiInterface
     /**
      * Get a field value by field name
      *
-     * @param string $id    the board's id
+     * @param string $id the board's id
      * @param string $field the field
      *
      * @return mixed field value
@@ -98,7 +99,7 @@ abstract class AbstractApi implements ApiInterface
             throw new InvalidArgumentException(sprintf('There is no field named %s.', $field));
         }
 
-        $response = $this->get($this->path.'/'.rawurlencode($id).'/'.rawurlencode($field));
+        $response = $this->get($this->path . '/' . rawurlencode($id) . '/' . rawurlencode($field));
 
         return isset($response['_value']) ? $response['_value'] : $response;
     }
@@ -106,47 +107,27 @@ abstract class AbstractApi implements ApiInterface
     /**
      * Send a GET request with query parameters.
      *
-     * @param string $path           Request path.
-     * @param array  $parameters     GET parameters.
-     * @param array  $requestHeaders Request Headers.
+     * @param string $path Request path.
+     * @param array $parameters GET parameters.
+     * @param array $requestHeaders Request Headers.
      *
-     * @return \Guzzle\Http\EntityBodyInterface|mixed|string
+     * @return mixed
      */
-    protected function get($path, array $parameters = array(), $requestHeaders = array())
+    protected function get($path, array $parameters = [], $requestHeaders = [])
     {
         $response = $this->client->getHttpClient()->get($path, $parameters, $requestHeaders);
 
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a HEAD request with query parameters
-     *
-     * @param string $path           Request path.
-     * @param array  $parameters     HEAD parameters.
-     * @param array  $requestHeaders Request headers.
-     *
-     * @return \Guzzle\Http\Message\Response
-     */
-    protected function head($path, array $parameters = array(), $requestHeaders = array())
+    protected function head(string $path, array $parameters = [], array $requestHeaders = []): ResponseInterface
     {
-        $response = $this->client->getHttpClient()->request($path, null, 'HEAD', $requestHeaders, array(
+        return $this->client->getHttpClient()->request($path, null, 'HEAD', $requestHeaders, [
             'query' => $parameters,
-        ));
-
-        return $response;
+        ]);
     }
 
-    /**
-     * Send a POST request with JSON-encoded parameters.
-     *
-     * @param string $path           Request path.
-     * @param array  $parameters     POST parameters to be JSON encoded.
-     * @param array  $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function post($path, array $parameters = array(), $requestHeaders = array())
+    protected function post(string $path, array $parameters = [], array $requestHeaders = [])
     {
         return $this->postRaw(
             $path,
@@ -155,16 +136,7 @@ abstract class AbstractApi implements ApiInterface
         );
     }
 
-    /**
-     * Send a POST request with raw data.
-     *
-     * @param string $path           Request path.
-     * @param mixed  $body           Request body.
-     * @param array  $requestHeaders Request headers.
-     *
-     * @return \Guzzle\Http\EntityBodyInterface|mixed|string
-     */
-    protected function postRaw($path, $body, $requestHeaders = array())
+    protected function postRaw(string $path, $body, array $requestHeaders = [])
     {
         $response = $this->client->getHttpClient()->post(
             $path,
@@ -175,16 +147,7 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a PATCH request with JSON-encoded parameters.
-     *
-     * @param string $path           Request path.
-     * @param array  $parameters     POST parameters to be JSON encoded.
-     * @param array  $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function patch($path, array $parameters = array(), $requestHeaders = array())
+    protected function patch(string $path, array $parameters = [], array $requestHeaders = [])
     {
         $response = $this->client->getHttpClient()->patch(
             $path,
@@ -195,16 +158,7 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a PUT request with JSON-encoded parameters.
-     *
-     * @param string $path           Request path.
-     * @param array  $parameters     POST parameters to be JSON encoded.
-     * @param array  $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function put($path, array $parameters = array(), $requestHeaders = array())
+    protected function put(string $path, array $parameters = [], array $requestHeaders = [])
     {
         foreach ($parameters as $name => $parameter) {
             if (is_bool($parameter)) {
@@ -221,16 +175,7 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Send a DELETE request with JSON-encoded parameters.
-     *
-     * @param string $path           Request path.
-     * @param array  $parameters     POST parameters to be JSON encoded.
-     * @param array  $requestHeaders Request headers.
-     *
-     * @return mixed
-     */
-    protected function delete($path, array $parameters = array(), $requestHeaders = array())
+    protected function delete(string $path, array $parameters = [], array $requestHeaders = [])
     {
         $response = $this->client->getHttpClient()->delete(
             $path,
@@ -241,13 +186,6 @@ abstract class AbstractApi implements ApiInterface
         return ResponseMediator::getContent($response);
     }
 
-    /**
-     * Prepare request parameters.
-     *
-     * @param array $parameters Request parameters
-     *
-     * @return null|string
-     */
     protected function createParametersBody(array $parameters)
     {
         foreach ($parameters as $name => $parameter) {
@@ -258,7 +196,7 @@ abstract class AbstractApi implements ApiInterface
                     if (is_bool($subParameter)) {
                         $subParameter = $subParameter ? 'true' : 'false';
                     }
-                    $parameters[$name.'/'.$subName] = $subParameter;
+                    $parameters[$name . '/' . $subName] = $subParameter;
                 }
                 unset($parameters[$name]);
             } elseif ($parameter instanceof DateTime) {
@@ -282,7 +220,7 @@ abstract class AbstractApi implements ApiInterface
      * Validate parameters array
      *
      * @param string[] $required required properties (array keys)
-     * @param array $params   array to check for existence of the required keys
+     * @param array $params array to check for existence of the required keys
      *
      * @throws MissingArgumentException if a required parameter is missing
      */
@@ -299,8 +237,8 @@ abstract class AbstractApi implements ApiInterface
      * Validate allowed parameters array
      * Checks whether the passed parameters are allowed
      *
-     * @param string[]        $allowed allowed properties
-     * @param array|string $params  array to check
+     * @param string[] $allowed allowed properties
+     * @param array|string $params array to check
      * @param string $paramName
      *
      * @return array array of validated parameters
@@ -310,7 +248,7 @@ abstract class AbstractApi implements ApiInterface
     protected function validateAllowedParameters(array $allowed, $params, $paramName)
     {
         if (!is_array($params)) {
-            $params = array($params);
+            $params = [$params];
         }
 
         foreach ($params as $param) {
@@ -332,7 +270,7 @@ abstract class AbstractApi implements ApiInterface
      * the keys in a given array
      *
      * @param string[] $atLeastOneOf allowed properties
-     * @param array $params       array to check
+     * @param array $params array to check
      *
      * @return boolean
      *

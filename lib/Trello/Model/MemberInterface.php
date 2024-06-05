@@ -300,7 +300,7 @@ interface MemberInterface extends ObjectInterface
     /**
      * Get organizations
      *
-     * @return array\OrganizationInterface[]
+     * @return array|OrganizationInterface[]
      */
     public function getOrganizations();
 

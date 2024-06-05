@@ -25,7 +25,7 @@ class PowerUps extends AbstractApi
      * Get all power ups that are enabled on the board
      * @link https://developer.atlassian.com/cloud/trello/rest/api-group-boards/#api-boards-id-plugins-get
      *
-     * @param string $id  the board's id
+     * @param string $boardId  the board's id
      *
      * @return array
      */
