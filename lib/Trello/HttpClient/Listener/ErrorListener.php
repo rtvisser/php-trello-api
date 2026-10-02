@@ -61,7 +61,7 @@ class ErrorListener
                 }
         }
 
-        if (is_array($content) && isset($content['message'])) {
+        if (is_array($content) && is_string($content['message'] ?? null)) {
             if (400 == $response->getStatusCode()) {
                 throw new ErrorException($content['message'], 400);
             }
@@ -101,9 +101,9 @@ class ErrorListener
             }
         }
 
-        $message = $content['message'] ?? $content;
+        $message = is_array($content) ? ($content['message'] ?? null) : $content;
 
-        if (!$message) {
+        if (!is_string($message) || '' === $message) {
             $message = (string) $response->getBody();
         }
 
